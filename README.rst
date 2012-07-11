@@ -9,7 +9,7 @@ Example:
 ::
 
     >>> from wardrobe import StackedDict
-    >>> clark = StackedDict()
+    >>> clark = StackedDict()  # Clark gets dressed.
     >>> clark['top'] = 'blue bodysuit'
     >>> clark['bottom'] = 'red underpants'
     >>> clark['friend'] = 'Lois'
@@ -19,16 +19,18 @@ Example:
     'red underpants'
     >>> clark['friend']
     'Lois'
-    >>> clark.push()
+    >>> clark.push()  # Let's add new layers of clothes.
+    >>> # Override top and bottom, not friend.
     >>> clark['top'] = 'shirt'
     >>> clark['bottom'] = 'jeans'
     >>> clark['top']
     'shirt'
     >>> clark['bottom']
     'jeans'
-    >>> clark['friend']
+    >>> clark['friend']  # Clark's friend is still Lois.
     'Lois'
-    >>> clark.pop()
+    >>> # ... Oh! the Earth is in danger! Go Clark, go!
+    >>> clark.pop()  # Drop costume.
     {'top': 'shirt', 'bottom': 'jeans'}
     >>> clark['top']
     'blue bodysuit'
@@ -36,6 +38,8 @@ Example:
     'red underpants'
     >>> clark['friend']
     'Lois'
+
+wardrobe.StackedDict is useful to create contexts.
 
 Original code is based on `Django's django.template.context:Context objects`_.
 
