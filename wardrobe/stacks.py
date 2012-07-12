@@ -68,6 +68,7 @@ class StackedDict(object):
             else:
                 initial = {}
         self._reset_stack(initial)
+        self._deleted_keys = deque([set()])
 
     def __copy__(self):
         """Copy operator.
@@ -150,17 +151,23 @@ class StackedDict(object):
                 return layer[key]
             except KeyError:
                 pass
+            if key in self._deleted_keys[0]:
+                raise KeyError(key)
         raise KeyError(key)
 
     def __setitem__(self, key, value):
         self._stack[0][key] = value
+        try:
+            self._deleted_keys[0].remove(key)
+        except KeyError:
+            pass
 
     def __delitem__(self, key):
         """Remove a key/value.
 
-        **Currently, this method doesn't affect previous stacks!**
-
         >>> stacked_dict = StackedDict(a=1, b=2, c=3)
+        >>> stacked_dict._deleted_keys[0]
+        set([])
         >>> stacked_dict['a']
         1
         >>> silent = stacked_dict.push()
@@ -168,9 +175,15 @@ class StackedDict(object):
         >>> stacked_dict['a']
         'one'
         >>> del stacked_dict['a']
+        >>> stacked_dict._deleted_keys[0]
+        set(['a'])
+        >>> stacked_dict['a']
+        Traceback (most recent call last):
+        ...
+        KeyError: 'a'
+        >>> silent = stacked_dict.pop()
         >>> stacked_dict['a']
         1
-        >>> silent = stacked_dict.pop()
         >>> del stacked_dict['a']
         >>> stacked_dict['a']
         Traceback (most recent call last):
@@ -179,6 +192,7 @@ class StackedDict(object):
 
         """
         del self._stack[0][key]
+        self._deleted_keys[0].add(key)
 
     def __iter__(self):
         return iter(self._stack)
@@ -194,9 +208,11 @@ class StackedDict(object):
         self._stack = deque([initial])
 
     def _has_key(self, key):
-        for layer in self._stack:
+        for depth, layer in enumerate(self._stack):
             if key in layer:
                 return True
+            if key in self._deleted_keys[depth]:
+                return False
         return False
 
     def keys(self):
@@ -210,17 +226,17 @@ class StackedDict(object):
         True
 
         """
-        keys = set()
-        for layer in self._stack:
-            keys.update(layer.keys())
-        return list(keys)
+        all_keys = set()
+        for depth, layer in enumerate(self._stack):
+            layer_keys = set(layer.keys()).difference(self._deleted_keys[depth])
+            all_keys.update(layer_keys)
+        return list(all_keys)
 
     def push(self):
-        layer = {}
-        self._stack.appendleft(layer)
+        self._stack.appendleft({})
+        self._deleted_keys.appendleft(set())
         return self
 
     def pop(self):
+        self._deleted_keys.popleft()
         return self._stack.popleft()
-
-
