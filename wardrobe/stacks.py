@@ -12,11 +12,8 @@ class StackedDict(object):
 
     Instances act like dictionaries.
 
-    Use :py:meth:`push` to take snapshots of the data, then :py:meth:`pop` to
-    restore the last snapshot.
-
-    Calls to push() or pop() affect (respectively create or delete) one entire
-    layer of the stack.
+    Calls to :py:meth:`push` or :py:meth:`pop`affect (respectively create or
+    delete) one entire layer of the stack.
 
     >>> from wardrobe import StackedDict
     >>> clark = StackedDict()

@@ -2,7 +2,7 @@
 wardrobe
 ########
 
-This project provides stack-based datastructures for Python: list of stacks.
+This project provides a stack-based datastructure for Python: StackedDict.
 
 Example:
 
@@ -39,9 +39,8 @@ Example:
     >>> clark['friend']
     'Lois'
 
-wardrobe.StackedDict is useful to create contexts.
-
-Original code is based on `Django's django.template.context:Context objects`_.
+wardrobe.StackedDict is useful to create context objects, like `Django's
+django.template.context:Context objects`_.
 
 **********
 Ressources
