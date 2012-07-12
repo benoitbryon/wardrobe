@@ -203,6 +203,22 @@ class StackedDict(object):
     def __cmp__(self, other):
         return cmp(self._stack, other._stack)
 
+    def __enter__(self):
+        """Implement context management ("with" statement).
+        
+        >>> s = StackedDict(a=1, b=2)
+        >>> with s.push():
+        ...    s['a'] = 'one'
+        >>> s['a']
+        1
+        
+        """
+        self.push()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        """Implement context management ("with" statement)."""
+        self.pop()
+
     def _reset_stack(self, initial={}):
         """(re)initialize data."""
         self._stack = deque([initial])
