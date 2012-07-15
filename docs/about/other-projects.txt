@@ -1,0 +1,34 @@
+#################################
+Alternatives and related projects
+#################################
+
+This document presents other projects that provide similar or complementary
+functionalities. It focuses on differences with wardrobe.
+
+
+**************************
+Django's template contexts
+**************************
+
+Django's template contexts (django.template.context.Context) are also
+dictionary-like objects that support push() and pop() methods.
+
+* wardrobe is lighter than Django.
+
+* wardrobe focuses on stack-based datastructures, whereas Django is a web
+  framework.
+
+* wardrobe.StackedDict targets general Python usage, whereas Django's Context
+  objects are specialized for use in the Django's template language.
+
+* As of Django 1.4, wardrobe.StackedDict instances looks more like standard
+  dict objects than Django's Context instances.
+
+* Django could use wardrobe.StackedDict... but, as of Django 1.4, it doesn't
+  match the "almost no external dependencies" policy in Django project.
+
+**********
+Contextvar
+**********
+
+

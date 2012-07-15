@@ -1,0 +1,7 @@
+wardrobe.exceptions
+===================
+
+.. automodule:: wardrobe.exceptions
+   :members:
+   :undoc-members:
+   :inherited-members:

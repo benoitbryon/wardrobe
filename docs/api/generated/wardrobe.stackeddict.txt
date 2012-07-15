@@ -1,0 +1,7 @@
+wardrobe.stackeddict
+====================
+
+.. automodule:: wardrobe.stackeddict
+   :members:
+   :undoc-members:
+   :inherited-members:

@@ -1,0 +1,7 @@
+wardrobe
+========
+
+.. automodule:: wardrobe
+   :members:
+   :undoc-members:
+   :inherited-members:

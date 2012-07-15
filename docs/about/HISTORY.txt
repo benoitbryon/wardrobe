@@ -6,4 +6,4 @@ Changelog for wardrobe
 0.1 (unreleased)
 ================
 
-- Proof of concept realease.
+- Initial implementation of StackedDict.

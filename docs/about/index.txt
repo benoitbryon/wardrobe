@@ -1,0 +1,19 @@
+##############
+About wardrobe
+##############
+
+This section is about the project itself.
+
+.. toctree::
+
+   vision
+   other-projects
+   LICENSE
+   HISTORY
+
+
+********************
+Why "wardrobe" name?
+********************
+
+Because, when one gets dressed, he puts on layers of clothes.

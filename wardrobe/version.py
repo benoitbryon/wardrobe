@@ -1,4 +1,4 @@
-"""Various utilities."""
+"""Utilities around project's version."""
 import os
 
 
@@ -6,6 +6,7 @@ class LazyString(object):
     """A str-like object which value is computed when the object is actually
     used as a string. Function argument must return a string.
 
+    >>> from wardrobe.version import LazyString
     >>> s = LazyString(str, 'Hello world!')
     >>> print s
     Hello world!
@@ -62,3 +63,6 @@ def read_relative_file(filename, relative_to=None):
 def read_version():
     """Return version number from version.txt."""
     return read_relative_file('version.txt').strip()
+
+
+version = LazyString(read_version)

@@ -1,0 +1,13 @@
+######
+Vision
+######
+
+wardrobe is about stack-based datastructures for Python.
+
+It's goal is to provide simple and general-usage stack-based datastructures, as
+a lightweight library.
+
+The project was created with StackedDict, in order to implement context
+objects.
+
+The project may provide more datastructures in future versions.
