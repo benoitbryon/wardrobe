@@ -11,4 +11,3 @@ sourcecode's documentation.
    wardrobe
    wardrobe.stackeddict
    wardrobe.exceptions
-   wardrobe.version

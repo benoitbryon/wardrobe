@@ -1,7 +1,0 @@
-wardrobe.version
-================
-
-.. automodule:: wardrobe.version
-   :members:
-   :undoc-members:
-   :inherited-members:

@@ -13,9 +13,12 @@ Or:
 See :py:class:`wardrobe.stackeddict.StackedDict` for details.
 
 """
+from os.path import abspath, dirname, join
+
 from wardrobe.stackeddict import StackedDict 
-from wardrobe.version import version as project_version
 
 
 #: Implement :pep:`396`
-__version__ = project_version
+package_dir = dirname(abspath(__file__))
+version_file = join(package_dir, 'version.txt')
+__version__ = open(version_file).read().strip()

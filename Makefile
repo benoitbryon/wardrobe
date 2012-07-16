@@ -1,3 +1,5 @@
+SHELL = /bin/sh
+
 PROJECT='wardrobe'
 ROOT_DIR=`pwd`
 
@@ -15,14 +17,13 @@ uninstall:
 	rm -r bin/ lib/
 
 tests:
-	bin/nosetests -v --rednose --with-doctest --with-coverage --cover-erase --cover-package=${PROJECT} ${PROJECT}/
-	bin/lettuce
+	bin/nosetests --config=etc/nose.cfg
 
 documentation:
-	rm -f docs/api/generated/*
+	rm -rf docs/api/generated/*
 	bin/sphinx-autogen --output-dir=docs/api/generated/ --suffix=txt --templates=docs/_templates/ docs/api/index.txt
 	bin/sphinx-autogen --output-dir=docs/api/generated/ --suffix=txt --templates=docs/_templates/ docs/api/generated/*.txt
-	cd docs/ && make clean html doctest
+	make --directory=docs clean html doctest
 
 readme:
 	mkdir -p docs/_build/html
