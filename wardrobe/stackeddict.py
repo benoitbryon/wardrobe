@@ -63,7 +63,6 @@ class StackedDict(object):
             else:
                 initial = {}
         self._reset_stack(initial)
-        self._deleted_keys = deque([set()])
 
     def __copy__(self):
         """Copy operator.
@@ -254,6 +253,7 @@ class StackedDict(object):
         return self.has_key(key)
 
     def __cmp__(self, other):
+        """Comparison operator."""
         return cmp(self._stack, other._stack)
 
     def __enter__(self):
@@ -275,6 +275,48 @@ class StackedDict(object):
     def _reset_stack(self, initial={}):
         """(re)initialize data."""
         self._stack = deque([initial])
+        self._deleted_keys = deque([set()])
+
+    def clear(self):
+        """Remove all items from the dictionary.
+
+        Affects only current layer.
+
+        >>> s = StackedDict(a=1, b=2, c=3)
+        >>> s.push().update(d=4, e=5)
+        >>> s.clear()
+        >>> dict(s)
+        {}
+        >>> s.pop()
+        {}
+        >>> dict(s) == dict(a=1, b=2, c=3)
+        True
+
+        """
+        for key in self.keys():
+            del self[key]
+
+    def copy(self):
+        """Return a shallow copy of instance."""
+        return copy(self)
+
+    @classmethod
+    def fromkeys(cls, seq, value=None):
+        """Create a new dictionary with keys from seq and values set to value.
+
+        :py:meth:`fromkeys` is a class method that returns a new dictionary.
+        value defaults to None.
+
+        """
+        initial = dict.fromkeys(seq, value)
+        return cls(**initial)
+
+    def get(key, default=None):
+        """"""
+        try:
+            return self[key]
+        except KeyError:
+            return default
 
     def has_key(self, key):
         """Return True if key is in instance, False otherwise.
@@ -307,6 +349,70 @@ class StackedDict(object):
             if key in self._deleted_keys[depth]:
                 return False
         return False
+
+    def items(self):
+        """Return a copy of the dictionary's list of (key, value) pairs.
+
+        >>> s = StackedDict(a=1, b=2)
+        >>> i = s.items()
+        >>> i.sort()
+        >>> i
+        [('a', 1), ('b', 2)]
+        >>> s.push().update(c=3)
+        >>> i = s.items()
+        >>> i.sort()
+        >>> i
+        [('a', 1), ('b', 2), ('c', 3)]
+
+        """
+        return [(key, self[key]) for key in self.keys()]
+
+    def iteritems(self):
+        """Return an iterator over the dictionary's (key, value) pairs.
+
+        >>> s = StackedDict(a=1, b=2)
+        >>> i = s.iteritems()
+        >>> i  # doctest: +ELLIPSIS
+        <generator object iteritems at 0x...>
+        >>> i = list(i)
+        >>> i.sort()
+        >>> i
+        [('a', 1), ('b', 2)]
+        >>> s.push().update(c=3)
+        >>> i = s.iteritems()
+        >>> i  # doctest: +ELLIPSIS
+        <generator object iteritems at 0x...>
+        >>> i = list(i)
+        >>> i.sort()
+        >>> i
+        [('a', 1), ('b', 2), ('c', 3)]
+
+        """
+        ignore_keys = set()
+        for depth, layer in enumerate(self._stack):
+            for key, value in layer.iteritems():
+                if not key in ignore_keys:
+                    yield (key, value)
+                    ignore_keys.add(key)
+            ignore_keys.update(self._deleted_keys[depth])
+
+    def iterkeys(self):
+        ignore_keys = set()
+        for depth, layer in enumerate(self._stack):
+            for key in layer.iterkeys():
+                if not key in ignore_keys:
+                    yield key
+                    ignore_keys.add(key)
+            ignore_keys.update(self._deleted_keys[depth])
+
+    def itervalues(self):
+        ignore_keys = set()
+        for depth, layer in enumerate(self._stack):
+            for key, value in layer.iteritems():
+                if not key in ignore_keys:
+                    yield value
+                    ignore_keys.add(key)
+            ignore_keys.update(self._deleted_keys[depth])
 
     def keys(self):
         """Return iterable on keys.
@@ -401,11 +507,38 @@ class StackedDict(object):
         for key in kwargs:
             self[key] = kwargs[key]
 
+    def pop(self):
+        self._deleted_keys.popleft()
+        return self._stack.popleft()
+
+    def popitem(self):
+        """Remove and return some (key, value) pair as a 2-tuple; but raise
+        KeyError if D is empty.
+
+        Affects only the current layer.
+
+        """
+        for key in self.iterkeys():
+            value = self[key]
+            del self[key]
+            return key, value
+
     def push(self):
         self._stack.appendleft({})
         self._deleted_keys.appendleft(set())
         return self
 
-    def pop(self):
-        self._deleted_keys.popleft()
-        return self._stack.popleft()
+    def setdefault(key, default):
+        pass
+
+    def values(self):
+        pass
+
+    def viewitems(self):
+        pass
+
+    def viewkeys(self):
+        pass
+
+    def viewvalues(self):
+        pass
