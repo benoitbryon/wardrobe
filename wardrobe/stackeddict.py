@@ -349,8 +349,21 @@ class StackedDict(object):
         initial = dict.fromkeys(seq, value)
         return cls(initial)
 
-    def get(key, default=None):
-        """"""
+    def get(self, key, default=None):
+        """Return the value for key if key is in the dictionary, else default.
+
+        If default is not given, it defaults to None, so that this method never
+        raises a KeyError.
+
+        >>> s = StackedDict(a=1)
+        >>> s.get('a')
+        1
+        >>> s.get('b') is None
+        True
+        >>> s.get('b', 2)
+        2
+
+        """
         try:
             return self[key]
         except KeyError:
