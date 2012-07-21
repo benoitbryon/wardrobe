@@ -315,14 +315,14 @@ class StackedDict(object):
 
     def copy(self):
         """Return a shallow copy of instance.
-        
+
         >>> s1 = StackedDict(a=1, b=2, c=3)
         >>> s2 = s1.copy()
         >>> s1 == s2
         True
         >>> s1 is s2
         False
-        
+
         """
         return copy(self)
 
@@ -333,9 +333,21 @@ class StackedDict(object):
         :py:meth:`fromkeys` is a class method that returns a new dictionary.
         value defaults to None.
 
+        >>> s = StackedDict.fromkeys(['a', 'b', 'c'])
+        >>> filter(lambda x: x is not None, s.values())
+        []
+
+        >>> s = StackedDict.fromkeys(['a', 'b', 'c'], 42)
+        >>> filter(lambda x: x is not 42, s.values())
+        []
+
+        >>> s = StackedDict.fromkeys(range(1, 5), 'Hello world!')
+        >>> filter(lambda x: x != 'Hello world!', s.values())
+        []
+
         """
         initial = dict.fromkeys(seq, value)
-        return cls(**initial)
+        return cls(initial)
 
     def get(key, default=None):
         """"""
@@ -578,13 +590,13 @@ class StackedDict(object):
         return self._dict.setdefault(key, default)
 
     def values(self):
-        pass
+        return self._dict.values()
 
     def viewitems(self):
-        pass
+        return self._dict.viewitems()
 
     def viewkeys(self):
-        pass
+        return self._dict.viewkeys()
 
     def viewvalues(self):
-        pass
+        return self._dict.viewvalues()
