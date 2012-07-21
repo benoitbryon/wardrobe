@@ -289,7 +289,7 @@ class StackedDict(object):
         Affects only current layer.
 
         >>> s = StackedDict(a=1, b=2, c=3)
-        >>> s.push().update(d=4, e=5)
+        >>> s.push().update(c='C', d=4, e=5)
         >>> s.clear()
         >>> dict(s)
         {}
