@@ -46,15 +46,12 @@ class StackedDict(object):
     def __init__(self, initial=None, **kwargs):
         """Constructor.
 
-        >>> sd = StackedDict()
-        >>> list(sd._stack)
-        [{}]
-        >>> sd = StackedDict({'a': 1})
-        >>> list(sd._stack)
-        [{'a': 1}]
-        >>> sd = StackedDict(a=1)
-        >>> list(sd._stack)
-        [{'a': 1}]
+        >>> dict(StackedDict())
+        {}
+        >>> dict(StackedDict({'a': 1}))
+        {'a': 1}
+        >>> dict(StackedDict(a=1))
+        {'a': 1}
 
         """
         if initial is None:
@@ -62,7 +59,15 @@ class StackedDict(object):
                 initial = kwargs
             else:
                 initial = {}
-        self._reset_stack(initial)
+        self._reset(initial)
+
+    def _reset(self, initial={}):
+        """(re)initialize data."""
+        self._dict = initial  # Active layer.
+        self._created = deque([])  # Store keys that have been created in
+                                   # current layer.
+        self._overriden = deque([])  # Store overriden (deleted or updated)
+                                   # (key, value) pairs.
 
     def __copy__(self):
         """Copy operator.
@@ -81,7 +86,9 @@ class StackedDict(object):
 
         """
         duplicate = copy(super(StackedDict, self))
-        duplicate._stack = copy(self._stack)
+        duplicate._dict = copy(self._dict)
+        duplicate._created = copy(self._created)
+        duplicate._overriden = copy(self._overriden)
         return duplicate
 
     def __len__(self):
@@ -104,7 +111,7 @@ class StackedDict(object):
         2
 
         """
-        return len(self.keys())
+        return len(self._dict)
 
     def __getitem__(self, key):
         """Get a variable's value, starting at the current layer and going
@@ -134,27 +141,27 @@ class StackedDict(object):
         >>> stacked_dict['some_key']
         'first'
         >>> silent = stacked_dict.pop()
-        >>> stacked_dict['some_key']
         Traceback (most recent call last):
         ...
-        KeyError: 'some_key'
+        PopException
+        >>> stacked_dict['some_key']
+        'first'
 
         """
-        for layer in self._stack:
-            try:
-                return layer[key]
-            except KeyError:
-                pass
-            if key in self._deleted_keys[0]:
-                raise KeyError(key)
-        raise KeyError(key)
+        return self._dict[key]
+
+    def _has_layers(self):
+        return bool(self._overriden)
 
     def __setitem__(self, key, value):
-        self._stack[0][key] = value
-        try:
-            self._deleted_keys[0].remove(key)
-        except KeyError:
-            pass
+        if self._has_layers():  # We may have to backup value.
+            if key not in self._dict:  # Adding a brand new key/value pair.
+                self._created[0].add(key)
+            elif key not in self._created[0]:  # A former layer is being
+                                               # overriden.
+                if key not in self._overriden[0]:  # Backup hasn't been set yet.
+                    self._overriden[0][key] = self._dict[key]
+        self._dict[key] = value
 
     def __delitem__(self, key):
         """Remove a key/value pair from current layer.
@@ -206,14 +213,13 @@ class StackedDict(object):
            the layer itself if you delete many keys.
 
         """
-        try:
-            del self._stack[0][key]
-        except KeyError:
-            if not key in self.keys():
-                raise
-        if len(self._stack) > 1:  # There is no need to store deleted keys on
-                                  # initial level.
-            self._deleted_keys[0].add(key)
+        if self._has_layers():
+            try:
+                self._created[0].remove(key)
+            except KeyError:
+                self._overriden[0][key] = self._dict.pop(key)
+        else:
+            del self._dict[key]
 
     def __iter__(self):
         """Iterate over keys.
@@ -254,7 +260,7 @@ class StackedDict(object):
 
     def __cmp__(self, other):
         """Comparison operator."""
-        return cmp(self._stack, other._stack)
+        return cmp(dict(self), dict(other))
 
     def __enter__(self):
         """Implement context management ("with" statement).
@@ -272,13 +278,13 @@ class StackedDict(object):
         """Implement context management ("with" statement)."""
         self.pop()
 
-    def _reset_stack(self, initial={}):
-        """(re)initialize data."""
-        self._stack = deque([initial])
-        self._deleted_keys = deque([set()])
-
     def clear(self):
         """Remove all items from the dictionary.
+
+        >>> s = StackedDict(a=1, b=2, c=3)
+        >>> s.clear()
+        >>> dict(s)
+        {}
 
         Affects only current layer.
 
@@ -293,8 +299,19 @@ class StackedDict(object):
         True
 
         """
-        for key in self.keys():
-            del self[key]
+        if self._has_layers():
+            # Delete keys created in current layer.
+            for key in self._created[0]:
+                del self._dict[key]
+            self._created[0] = set()
+            # Delete keys that have already been backuped.
+            for key in self._overriden[0].keys():
+                del self._dict[key]
+            # Remaining keys are overriden ones.
+            for key in self._dict.keys():
+                self._overriden[0][key] = self._dict.pop(key)
+        else:
+            self._dict.clear()
 
     def copy(self):
         """Return a shallow copy of instance."""
@@ -343,12 +360,7 @@ class StackedDict(object):
         False
         
         """
-        for depth, layer in enumerate(self._stack):
-            if key in layer:
-                return True
-            if key in self._deleted_keys[depth]:
-                return False
-        return False
+        return self._dict.has_key(key)
 
     def items(self):
         """Return a copy of the dictionary's list of (key, value) pairs.
@@ -388,31 +400,16 @@ class StackedDict(object):
         [('a', 1), ('b', 2), ('c', 3)]
 
         """
-        ignore_keys = set()
-        for depth, layer in enumerate(self._stack):
-            for key, value in layer.iteritems():
-                if not key in ignore_keys:
-                    yield (key, value)
-                    ignore_keys.add(key)
-            ignore_keys.update(self._deleted_keys[depth])
+        for item in self._dict.iteritems():
+            yield item
 
     def iterkeys(self):
-        ignore_keys = set()
-        for depth, layer in enumerate(self._stack):
-            for key in layer.iterkeys():
-                if not key in ignore_keys:
-                    yield key
-                    ignore_keys.add(key)
-            ignore_keys.update(self._deleted_keys[depth])
+        for key in self._dict.iterkeys():
+            yield keys
 
     def itervalues(self):
-        ignore_keys = set()
-        for depth, layer in enumerate(self._stack):
-            for key, value in layer.iteritems():
-                if not key in ignore_keys:
-                    yield value
-                    ignore_keys.add(key)
-            ignore_keys.update(self._deleted_keys[depth])
+        for value in self._dict.itervalues():
+            yield value
 
     def keys(self):
         """Return iterable on keys.
@@ -445,12 +442,7 @@ class StackedDict(object):
         ['a']
 
         """
-        keys = set()
-        for depth, layer in enumerate(reversed(self._stack)):
-            # keys = previous_keys + layer_keys - layer_deleted_keys
-            keys.update(set(layer.keys()))
-            keys.difference_update(self._deleted_keys[depth])
-        return list(keys)
+        return self._dict.keys()
 
     def update(self, *args, **kwargs):
         """Update instance from dict (positional argument) and/or iterable
@@ -508,8 +500,53 @@ class StackedDict(object):
             self[key] = kwargs[key]
 
     def pop(self):
-        self._deleted_keys.popleft()
-        return self._stack.popleft()
+        """Restore dictionary to state before last push().
+        
+        >>> s = StackedDict(a=1, b=2)
+        >>> s.push().update(c=3, d=4)
+        >>> s.pop()
+        {'c': 3, 'd': 4}
+        >>> dict(s)
+        {'a': 1, 'b': 2}
+        >>> s.push().update(a='A', b='B')
+        >>> s.pop()
+        {'a': 'A', 'b': 'B'}
+        >>> dict(s)
+        {'a': 1, 'b': 2}
+        >>> s.push().update(a='A', c=3)
+        >>> s.pop()
+        {'a': 'A', 'c': 3}
+        >>> dict(s)
+        {'a': 1, 'b': 2}
+
+        Raises PopException when invoked on a StackedDict instance that hasn't
+        been pushed yet.
+
+        >>> s = StackedDict()
+        >>> s.pop()
+        Traceback (most recent call last):
+        ...
+        PopException
+        
+        """
+        layer = {}  # We will return current changes.
+        # Pop.
+        try:
+            created = self._created.popleft()
+            overriden = self._overriden.popleft()
+        except IndexError:
+            raise PopException()
+        # Delete created keys.
+        for key in created: 
+            layer[key] = self._dict.pop(key)
+        # Restore overridden (key, value) pairs. 
+        for key, value in overriden.items():
+            try:
+                layer[key] = self._dict[key]
+            except KeyError:  # Case of deleted item.
+                pass
+            self._dict[key] = value
+        return layer
 
     def popitem(self):
         """Remove and return some (key, value) pair as a 2-tuple; but raise
@@ -524,12 +561,12 @@ class StackedDict(object):
             return key, value
 
     def push(self):
-        self._stack.appendleft({})
-        self._deleted_keys.appendleft(set())
+        self._created.appendleft(set())
+        self._overriden.appendleft({})
         return self
 
-    def setdefault(key, default):
-        pass
+    def setdefault(self, key, default):
+        return self._dict.setdefault(key, default)
 
     def values(self):
         pass
