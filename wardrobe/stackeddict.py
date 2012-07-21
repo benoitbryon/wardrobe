@@ -314,7 +314,16 @@ class StackedDict(object):
             self._dict.clear()
 
     def copy(self):
-        """Return a shallow copy of instance."""
+        """Return a shallow copy of instance.
+        
+        >>> s1 = StackedDict(a=1, b=2, c=3)
+        >>> s2 = s1.copy()
+        >>> s1 == s2
+        True
+        >>> s1 is s2
+        False
+        
+        """
         return copy(self)
 
     @classmethod
