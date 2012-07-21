@@ -454,6 +454,18 @@ class StackedDict(object):
             yield key
 
     def itervalues(self):
+        """Return an iterator over the dictionary's values.
+        
+        >>> s = StackedDict(a=1, b=2, c=3)
+        >>> i = s.itervalues()
+        >>> i  # doctest: +ELLIPSIS
+        <generator object itervalues at 0x...>
+        >>> l = list(i)
+        >>> l.sort()
+        >>> l
+        [1, 2, 3]
+        
+        """
         for value in self._dict.itervalues():
             yield value
 
