@@ -607,16 +607,43 @@ class StackedDict(object):
         return layer
 
     def popitem(self):
-        """Remove and return some (key, value) pair as a 2-tuple; but raise
-        KeyError if D is empty.
+        """Remove and return some (key, value) pair as a 2-tuple.
+
+        >>> s = StackedDict(a=1)
+        >>> s.popitem()
+        ('a', 1)
+        >>> len(s)
+        0
+
+        Raises KeyError if D is empty.
+
+        >>> s = StackedDict()
+        >>> s.popitem()
+        Traceback (most recent call last):
+        ...
+        KeyError: 'popitem(): dictionary is empty'
 
         Affects only the current layer.
 
+        >>> s = StackedDict(a=1)
+        >>> s.push()  # doctest: +ELLIPSIS
+        <wardrobe.stackeddict.StackedDict object at 0x...>
+        >>> s.popitem()
+        ('a', 1)
+        >>> s.pop()
+        {}
+        >>> dict(s)
+        {'a': 1}
+
         """
-        for key in self.iterkeys():
-            value = self[key]
-            del self[key]
-            return key, value
+        key, value = self._dict.popitem()
+        if self._has_layers():
+            try:  # Delete key from created keys...
+                self._created[0].remove(key)
+            except KeyError:  # ... or mark key as overriden.
+                if key not in self._overriden[0]:
+                    self._overriden[0][key] = value
+        return key, value
 
     def push(self):
         self._created.appendleft(set())
