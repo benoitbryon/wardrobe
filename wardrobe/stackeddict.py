@@ -650,8 +650,24 @@ class StackedDict(object):
         self._overriden.appendleft({})
         return self
 
-    def setdefault(self, key, default):
-        return self._dict.setdefault(key, default)
+    def setdefault(self, key, default=None):
+        """If key is in the dictionary, return its value. If not, insert key
+        with a value of default and return default. default defaults to None.
+
+        >>> s = StackedDict()
+        >>> s.setdefault('a', 1)
+        1
+        >>> s.setdefault('a', 2)
+        1
+        >>> s.setdefault('b') is None
+        True
+
+        """
+        try:
+            return self[key]
+        except KeyError:
+            self[key] = default
+            return default
 
     def values(self):
         return self._dict.values()
