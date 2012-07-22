@@ -19,6 +19,9 @@ uninstall:
 tests:
 	bin/nosetests --config=etc/nose.cfg
 
+benchmark:
+	bin/bpython benchmarks/stackeddict.py
+
 documentation:
 	rm -rf docs/api/generated/*
 	bin/sphinx-autogen --output-dir=docs/api/generated/ --suffix=txt --templates=docs/_templates/ docs/api/index.txt
