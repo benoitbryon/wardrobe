@@ -673,10 +673,69 @@ class StackedDict(object):
         return self._dict.values()
 
     def viewitems(self):
+        """Return a new view of the dictionary's items ((key, value) pairs).
+
+        See http://docs.python.org/library/stdtypes.html#dictionary-view-objects
+        for documentation of view objects.
+
+        >>> s = StackedDict()
+        >>> view = s.viewitems()
+        >>> view
+        dict_items([])
+        >>> s.update(a=1)
+        >>> view
+        dict_items([('a', 1)])
+        >>> s.push().update(a='A')
+        >>> view
+        dict_items([('a', 'A')])
+
+        """
         return self._dict.viewitems()
 
     def viewkeys(self):
+        """
+
+        See http://docs.python.org/library/stdtypes.html#dictionary-view-objects
+        for documentation of view objects.
+
+        >>> s = StackedDict()
+        >>> view = s.viewkeys()
+        >>> view
+        dict_keys([])
+        >>> s.update(a=1)
+        >>> view
+        dict_keys(['a'])
+        >>> s.push()  # doctest: +ELLIPSIS
+        <wardrobe.stackeddict.StackedDict object at 0x...>
+        >>> del s['a']
+        >>> s['b'] = 2
+        >>> view
+        dict_keys(['b'])
+
+        """
+
         return self._dict.viewkeys()
 
     def viewvalues(self):
+        """
+
+        See http://docs.python.org/library/stdtypes.html#dictionary-view-objects
+        for documentation of view objects.
+
+        >>> s = StackedDict()
+        >>> view = s.viewvalues()
+        >>> view
+        dict_values([])
+        >>> s.update(a=1)
+        >>> view
+        dict_values([1])
+        >>> s.push()  # doctest: +ELLIPSIS
+        <wardrobe.stackeddict.StackedDict object at 0x...>
+        >>> del s['a']
+        >>> s['b'] = 2
+        >>> view
+        dict_values([2])
+
+        """
+
         return self._dict.viewvalues()
