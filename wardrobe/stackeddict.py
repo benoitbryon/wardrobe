@@ -328,9 +328,9 @@ class StackedDict(object):
 
     @classmethod
     def fromkeys(cls, seq, value=None):
-        """Create a new dictionary with keys from seq and values set to value.
+        """Create a new StackedDict with keys from seq and values set to value.
 
-        :py:meth:`fromkeys` is a class method that returns a new dictionary.
+        :py:meth:`fromkeys` is a class method that returns a new StackedDict.
         value defaults to None.
 
         >>> s = StackedDict.fromkeys(['a', 'b', 'c'])
@@ -397,7 +397,7 @@ class StackedDict(object):
         return self._dict.has_key(key)
 
     def items(self):
-        """Return a copy of the dictionary's list of (key, value) pairs.
+        """Return a copy of the StackedDict's list of (key, value) pairs.
 
         >>> s = StackedDict(a=1, b=2)
         >>> i = s.items()
@@ -414,7 +414,7 @@ class StackedDict(object):
         return [(key, self[key]) for key in self.keys()]
 
     def iteritems(self):
-        """Return an iterator over the dictionary's (key, value) pairs.
+        """Return an iterator over the StackedDict's (key, value) pairs.
 
         >>> s = StackedDict(a=1, b=2)
         >>> i = s.iteritems()
@@ -438,7 +438,7 @@ class StackedDict(object):
             yield item
 
     def iterkeys(self):
-        """Return an iterator over the dictionary's keys.
+        """Return an iterator over the StackedDict's keys.
         
         >>> s = StackedDict(a=1, b=2, c=3)
         >>> i = s.iterkeys()
@@ -454,7 +454,7 @@ class StackedDict(object):
             yield key
 
     def itervalues(self):
-        """Return an iterator over the dictionary's values.
+        """Return an iterator over the StackedDict's values.
         
         >>> s = StackedDict(a=1, b=2, c=3)
         >>> i = s.itervalues()
@@ -558,7 +558,7 @@ class StackedDict(object):
             self[key] = kwargs[key]
 
     def pop(self):
-        """Restore dictionary to state before last push().
+        """Restore dictionary to state before last :py:meth:`push`.
         
         >>> s = StackedDict(a=1, b=2)
         >>> s.push().update(c=3, d=4)
@@ -646,6 +646,23 @@ class StackedDict(object):
         return key, value
 
     def push(self):
+        """Save current dictionary state, record next changes in some diff
+        history.
+
+        Returns StackedDict instance, so that you can chain operations.
+
+        Use :py:meth:`pop` to restore the saved state.
+
+        >>> s = StackedDict(a=1)
+        >>> s.push().update(a='A')
+        >>> dict(s)
+        {'a': 'A'}
+        >>> s.pop()
+        {'a': 'A'}
+        >>> dict(s)
+        {'a': 1}
+
+        """
         self._created.appendleft(set())
         self._overriden.appendleft({})
         return self
@@ -670,10 +687,19 @@ class StackedDict(object):
             return default
 
     def values(self):
+        """Return a copy of the StackedDict's list of values.
+
+        >>> s = StackedDict(a=1, b=2)
+        >>> values = s.values()
+        >>> values.sort()
+        >>> values
+        [1, 2]
+
+        """
         return self._dict.values()
 
     def viewitems(self):
-        """Return a new view of the dictionary's items ((key, value) pairs).
+        """Return a new view of the StackedDict's items ((key, value) pairs).
 
         See http://docs.python.org/library/stdtypes.html#dictionary-view-objects
         for documentation of view objects.
@@ -713,7 +739,6 @@ class StackedDict(object):
         dict_keys(['b'])
 
         """
-
         return self._dict.viewkeys()
 
     def viewvalues(self):
@@ -737,5 +762,4 @@ class StackedDict(object):
         dict_values([2])
 
         """
-
         return self._dict.viewvalues()
