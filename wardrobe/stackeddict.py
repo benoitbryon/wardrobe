@@ -1,5 +1,5 @@
 """StackedDict implementation."""
-from collections import deque
+from collections import deque, MutableMapping
 from copy import copy
 
 
@@ -8,7 +8,7 @@ class NoRevisionException(Exception):
     commit()."""
 
 
-class StackedDict(object):
+class StackedDict(MutableMapping):
     """Dictionary-like object made of stacked layers.
 
     Instances act like dictionaries.
