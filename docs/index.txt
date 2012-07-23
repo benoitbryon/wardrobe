@@ -30,8 +30,8 @@ save the current state (commit) and restore it (reset).
   ...                 'head': 'glasses',
   ...                 'friend': 'Lois'}
   True
-  >>> clark.reset() == {'top': 'shirt', 'bottom': 'jeans', 'head': 'glasses'}
-  True
+  >>> clark.reset()  # doctest: +ELLIPSIS
+  <wardrobe.stackeddict.StackedDict object at 0x...>
   >>> dict(clark) == {'top': 'blue bodysuit',
   ...                 'bottom': 'red underpants',
   ...                 'friend': 'Lois',

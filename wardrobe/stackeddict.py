@@ -36,8 +36,8 @@ class StackedDict(MutableMapping):
     ...                 'head': 'glasses',
     ...                 'friend': 'Lois'}
     True
-    >>> clark.reset() == {'top': 'shirt', 'bottom': 'jeans', 'head': 'glasses'}
-    True
+    >>> clark.reset()  # doctest: +ELLIPSIS
+    <wardrobe.stackeddict.StackedDict object at 0x...>
     >>> dict(clark) == {'top': 'blue bodysuit',
     ...                 'bottom': 'red underpants',
     ...                 'friend': 'Lois',
@@ -292,8 +292,7 @@ class StackedDict(MutableMapping):
         >>> s.clear()
         >>> dict(s)
         {}
-        >>> s.reset()
-        {}
+        >>> silent = s.reset()
         >>> dict(s) == dict(a=1, b=2, c=3)
         True
 
@@ -584,8 +583,7 @@ class StackedDict(MutableMapping):
         <wardrobe.stackeddict.StackedDict object at 0x...>
         >>> s.pop('b')
         2
-        >>> s.reset()
-        {}
+        >>> silent = s.reset()
         >>> s['b']
         2
 
@@ -619,12 +617,10 @@ class StackedDict(MutableMapping):
         Affects only the current layer.
 
         >>> s = StackedDict(a=1)
-        >>> s.commit()  # doctest: +ELLIPSIS
-        <wardrobe.stackeddict.StackedDict object at 0x...>
+        >>> silent = s.commit()
         >>> s.popitem()
         ('a', 1)
-        >>> s.reset()
-        {}
+        >>> silent = s.reset()
         >>> dict(s)
         {'a': 1}
 
@@ -747,8 +743,7 @@ class StackedDict(MutableMapping):
         >>> s.commit().update(a='A')
         >>> dict(s)
         {'a': 'A'}
-        >>> s.reset()
-        {'a': 'A'}
+        >>> silent = s.reset()
         >>> dict(s)
         {'a': 1}
 
@@ -762,18 +757,18 @@ class StackedDict(MutableMapping):
         
         >>> s = StackedDict(a=1, b=2)
         >>> s.commit().update(c=3, d=4)
-        >>> s.reset()
-        {'c': 3, 'd': 4}
+        >>> s.reset()  # doctest: +ELLIPSIS
+        <wardrobe.stackeddict.StackedDict object at 0x...>
         >>> dict(s)
         {'a': 1, 'b': 2}
         >>> s.commit().update(a='A', b='B')
-        >>> s.reset()
-        {'a': 'A', 'b': 'B'}
+        >>> s.reset()  # doctest: +ELLIPSIS
+        <wardrobe.stackeddict.StackedDict object at 0x...>
         >>> dict(s)
         {'a': 1, 'b': 2}
         >>> s.commit().update(a='A', c=3)
-        >>> s.reset()
-        {'a': 'A', 'c': 3}
+        >>> s.reset()  # doctest: +ELLIPSIS
+        <wardrobe.stackeddict.StackedDict object at 0x...>
         >>> dict(s)
         {'a': 1, 'b': 2}
 
@@ -787,7 +782,6 @@ class StackedDict(MutableMapping):
         NoRevisionException
         
         """
-        layer = {}  # We will return current changes.
         # Pop.
         try:
             created = self._created.popleft()
@@ -796,12 +790,8 @@ class StackedDict(MutableMapping):
             raise NoRevisionException()
         # Delete created keys.
         for key in created: 
-            layer[key] = self._dict.pop(key)
+            del self._dict[key]
         # Restore overridden (key, value) pairs. 
         for key, value in overriden.items():
-            try:
-                layer[key] = self._dict[key]
-            except KeyError:  # Case of deleted item.
-                pass
             self._dict[key] = value
-        return layer
+        return self
