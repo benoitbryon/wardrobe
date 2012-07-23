@@ -2,7 +2,11 @@
 wardrobe
 ########
 
-This project provides a stack-based datastructure for Python: StackedDict.
+wardrobe is a Python project that provides a stack-based datastructure:
+:py:class`StackedDict`.
+
+:py:class`StackedDict` is a dictionary-like object with additional methods to
+save the current state (commit) and restore it (reset).
 
 Example:
 
@@ -19,7 +23,7 @@ Example:
   ...                 'friend': 'Lois',
   ...                 'sex_appeal': True}
   True
-  >>> clark.push()  # doctest: +ELLIPSIS
+  >>> clark.commit()  # doctest: +ELLIPSIS
   <wardrobe.stackeddict.StackedDict object at 0x...>
   >>> clark.update({'top': 'shirt', 'bottom': 'jeans', 'head': 'glasses'})
   >>> del clark['sex_appeal']
@@ -28,7 +32,7 @@ Example:
   ...                 'head': 'glasses',
   ...                 'friend': 'Lois'}
   True
-  >>> clark.pop() == {'top': 'shirt', 'bottom': 'jeans', 'head': 'glasses'}
+  >>> clark.reset() == {'top': 'shirt', 'bottom': 'jeans', 'head': 'glasses'}
   True
   >>> dict(clark) == {'top': 'blue bodysuit',
   ...                 'bottom': 'red underpants',

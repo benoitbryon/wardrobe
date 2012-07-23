@@ -2,7 +2,10 @@
 from collections import deque
 from copy import copy
 
-from wardrobe.exceptions import PopException
+
+class NoRevisionException(Exception):
+    """Exception raised when reset() has been called more times than
+    commit()."""
 
 
 class StackedDict(object):
@@ -24,7 +27,7 @@ class StackedDict(object):
     ...                 'friend': 'Lois',
     ...                 'sex_appeal': True}
     True
-    >>> clark.push()  # doctest: +ELLIPSIS
+    >>> clark.commit()  # doctest: +ELLIPSIS
     <wardrobe.stackeddict.StackedDict object at 0x...>
     >>> clark.update({'top': 'shirt', 'bottom': 'jeans', 'head': 'glasses'})
     >>> del clark['sex_appeal']
@@ -33,7 +36,7 @@ class StackedDict(object):
     ...                 'head': 'glasses',
     ...                 'friend': 'Lois'}
     True
-    >>> clark.pop() == {'top': 'shirt', 'bottom': 'jeans', 'head': 'glasses'}
+    >>> clark.reset() == {'top': 'shirt', 'bottom': 'jeans', 'head': 'glasses'}
     True
     >>> dict(clark) == {'top': 'blue bodysuit',
     ...                 'bottom': 'red underpants',
@@ -59,10 +62,6 @@ class StackedDict(object):
                 initial = kwargs
             else:
                 initial = {}
-        self._reset(initial)
-
-    def _reset(self, initial={}):
-        """(re)initialize data."""
         self._dict = initial  # Active layer.
         self._created = deque([])  # Store keys that have been created in
                                    # current layer.
@@ -94,20 +93,20 @@ class StackedDict(object):
     def __len__(self):
         """Return number of elements.
 
-        >>> stacked_dict = StackedDict({'a': 1, 'b': 2})
-        >>> len(stacked_dict)
+        >>> s = StackedDict({'a': 1, 'b': 2})
+        >>> len(s)
         2
-        >>> stacked_dict.push()['c'] = 3
-        >>> len(stacked_dict)
+        >>> s.commit()['c'] = 3
+        >>> len(s)
         3
-        >>> stacked_dict.push()['c'] = 4
-        >>> len(stacked_dict)
+        >>> s.commit()['c'] = 4
+        >>> len(s)
         3
-        >>> silent = stacked_dict.pop()
-        >>> len(stacked_dict)
+        >>> silent = s.reset()
+        >>> len(s)
         3
-        >>> silent = stacked_dict.pop()
-        >>> len(stacked_dict)
+        >>> silent = s.reset()
+        >>> len(s)
         2
 
         """
@@ -117,34 +116,34 @@ class StackedDict(object):
         """Get a variable's value, starting at the current layer and going
         upward.
 
-        >>> stacked_dict = StackedDict()
-        >>> stacked_dict['some_key']
+        >>> s = StackedDict()
+        >>> s['some_key']
         Traceback (most recent call last):
         ...
         KeyError: 'some_key'
-        >>> stacked_dict['some_key'] = 'first'
-        >>> stacked_dict['some_key']
+        >>> s['some_key'] = 'first'
+        >>> s['some_key']
         'first'
-        >>> silent = stacked_dict.push()
-        >>> stacked_dict['some_key']
+        >>> silent = s.commit()
+        >>> s['some_key']
         'first'
-        >>> stacked_dict['some_key'] = 'second'
-        >>> stacked_dict['some_key']
+        >>> s['some_key'] = 'second'
+        >>> s['some_key']
         'second'
-        >>> silent = stacked_dict.push()
-        >>> stacked_dict['some_key']
+        >>> silent = s.commit()
+        >>> s['some_key']
         'second'
-        >>> silent = stacked_dict.pop()
-        >>> stacked_dict['some_key']
+        >>> silent = s.reset()
+        >>> s['some_key']
         'second'
-        >>> silent = stacked_dict.pop()
-        >>> stacked_dict['some_key']
+        >>> silent = s.reset()
+        >>> s['some_key']
         'first'
-        >>> silent = stacked_dict.pop()
+        >>> silent = s.reset()
         Traceback (most recent call last):
         ...
-        PopException
-        >>> stacked_dict['some_key']
+        NoRevisionException
+        >>> s['some_key']
         'first'
 
         """
@@ -169,39 +168,39 @@ class StackedDict(object):
         Affects only current layer, i.e. keys that were deleted in a layer
         can reappear when the layer is dropped.
 
-        >>> stacked_dict = StackedDict(a=1, b=2, c=3, d=4)
-        >>> del stacked_dict['d']
-        >>> stacked_dict['d']
+        >>> s = StackedDict(a=1, b=2, c=3, d=4)
+        >>> del s['d']
+        >>> s['d']
         Traceback (most recent call last):
         ...
         KeyError: 'd'
-        >>> silent = stacked_dict.push()
-        >>> stacked_dict['d']
+        >>> silent = s.commit()
+        >>> s['d']
         Traceback (most recent call last):
         ...
         KeyError: 'd'
-        >>> del stacked_dict['a']
-        >>> stacked_dict['a']
+        >>> del s['a']
+        >>> s['a']
         Traceback (most recent call last):
         ...
         KeyError: 'a'
-        >>> stacked_dict['a'] = 'restored'
-        >>> 'a' in stacked_dict.keys()
+        >>> s['a'] = 'restored'
+        >>> 'a' in s.keys()
         True
-        >>> del stacked_dict['a']
-        >>> del stacked_dict['unknown']
+        >>> del s['a']
+        >>> del s['unknown']
         Traceback (most recent call last):
         ...
         KeyError: 'unknown'
-        >>> del stacked_dict['d']
+        >>> del s['d']
         Traceback (most recent call last):
         ...
         KeyError: 'd'
-        >>> silent = stacked_dict.pop()
-        >>> stacked_dict['a']
+        >>> silent = s.reset()
+        >>> s['a']
         1
-        >>> del stacked_dict['a']
-        >>> stacked_dict['a']
+        >>> del s['a']
+        >>> s['a']
         Traceback (most recent call last):
         ...
         KeyError: 'a'
@@ -266,17 +265,17 @@ class StackedDict(object):
         """Implement context management ("with" statement).
         
         >>> s = StackedDict(a=1, b=2)
-        >>> with s.push():
+        >>> with s.commit():
         ...    s['a'] = 'one'
         >>> s['a']
         1
         
         """
-        self.push()
+        self.commit()
 
     def __exit__(self, exc_type, exc_value, traceback):
         """Implement context management ("with" statement)."""
-        self.pop()
+        self.reset()
 
     def clear(self):
         """Remove all items from the dictionary.
@@ -289,11 +288,11 @@ class StackedDict(object):
         Affects only current layer.
 
         >>> s = StackedDict(a=1, b=2, c=3)
-        >>> s.push().update(c='C', d=4, e=5)
+        >>> s.commit().update(c='C', d=4, e=5)
         >>> s.clear()
         >>> dict(s)
         {}
-        >>> s.pop()
+        >>> s.reset()
         {}
         >>> dict(s) == dict(a=1, b=2, c=3)
         True
@@ -381,14 +380,14 @@ class StackedDict(object):
         True
         >>> s.has_key(1)
         False
-        >>> s.push()  # doctest: +ELLIPSIS
+        >>> s.commit()  # doctest: +ELLIPSIS
         <wardrobe.stackeddict.StackedDict object at 0x...>
         >>> s.has_key('a')
         True
         >>> del s['a']
         >>> s.has_key('a')
         False
-        >>> s.push()  # doctest: +ELLIPSIS
+        >>> s.commit()  # doctest: +ELLIPSIS
         <wardrobe.stackeddict.StackedDict object at 0x...>
         >>> s.has_key('a')
         False
@@ -404,7 +403,7 @@ class StackedDict(object):
         >>> i.sort()
         >>> i
         [('a', 1), ('b', 2)]
-        >>> s.push().update(c=3)
+        >>> s.commit().update(c=3)
         >>> i = s.items()
         >>> i.sort()
         >>> i
@@ -424,7 +423,7 @@ class StackedDict(object):
         >>> i.sort()
         >>> i
         [('a', 1), ('b', 2)]
-        >>> s.push().update(c=3)
+        >>> s.commit().update(c=3)
         >>> i = s.iteritems()
         >>> i  # doctest: +ELLIPSIS
         <generator object iteritems at 0x...>
@@ -472,8 +471,8 @@ class StackedDict(object):
     def keys(self):
         """Return iterable on keys.
 
-        >>> stacked_dict = StackedDict(a=1, b=2, c=3)
-        >>> keys = stacked_dict.keys()
+        >>> s = StackedDict(a=1, b=2, c=3)
+        >>> keys = s.keys()
         >>> len(keys) == 3
         True
         >>> 'a' in keys and 'b' in keys and 'c' in keys
@@ -482,21 +481,21 @@ class StackedDict(object):
         Deleted keys aren't returned... until the layer where the key was
         deleted is dropped.
 
-        >>> stacked_dict = StackedDict(a=1)
-        >>> stacked_dict.keys()
+        >>> s = StackedDict(a=1)
+        >>> s.keys()
         ['a']
-        >>> silent = stacked_dict.push()
-        >>> del stacked_dict['a']
-        >>> stacked_dict.keys()
+        >>> silent = s.commit()
+        >>> del s['a']
+        >>> s.keys()
         []
-        >>> silent = stacked_dict.push()
-        >>> stacked_dict.keys()
+        >>> silent = s.commit()
+        >>> s.keys()
         []
-        >>> silent = stacked_dict.pop()
-        >>> stacked_dict.keys()
+        >>> silent = s.reset()
+        >>> s.keys()
         []
-        >>> silent = stacked_dict.pop()
-        >>> stacked_dict.keys()
+        >>> silent = s.reset()
+        >>> s.keys()
         ['a']
 
         """
@@ -557,55 +556,10 @@ class StackedDict(object):
         for key in kwargs:
             self[key] = kwargs[key]
 
-    def pop(self):
-        """Restore dictionary to state before last :py:meth:`push`.
-        
-        >>> s = StackedDict(a=1, b=2)
-        >>> s.push().update(c=3, d=4)
-        >>> s.pop()
-        {'c': 3, 'd': 4}
-        >>> dict(s)
-        {'a': 1, 'b': 2}
-        >>> s.push().update(a='A', b='B')
-        >>> s.pop()
-        {'a': 'A', 'b': 'B'}
-        >>> dict(s)
-        {'a': 1, 'b': 2}
-        >>> s.push().update(a='A', c=3)
-        >>> s.pop()
-        {'a': 'A', 'c': 3}
-        >>> dict(s)
-        {'a': 1, 'b': 2}
+    def reset(self):
+        """"""
 
-        Raises PopException when invoked on a StackedDict instance that hasn't
-        been pushed yet.
-
-        >>> s = StackedDict()
-        >>> s.pop()
-        Traceback (most recent call last):
-        ...
-        PopException
-        
-        """
-        layer = {}  # We will return current changes.
-        # Pop.
-        try:
-            created = self._created.popleft()
-            overriden = self._overriden.popleft()
-        except IndexError:
-            raise PopException()
-        # Delete created keys.
-        for key in created: 
-            layer[key] = self._dict.pop(key)
-        # Restore overridden (key, value) pairs. 
-        for key, value in overriden.items():
-            try:
-                layer[key] = self._dict[key]
-            except KeyError:  # Case of deleted item.
-                pass
-            self._dict[key] = value
-        return layer
-
+    
     def popitem(self):
         """Remove and return some (key, value) pair as a 2-tuple.
 
@@ -626,11 +580,11 @@ class StackedDict(object):
         Affects only the current layer.
 
         >>> s = StackedDict(a=1)
-        >>> s.push()  # doctest: +ELLIPSIS
+        >>> s.commit()  # doctest: +ELLIPSIS
         <wardrobe.stackeddict.StackedDict object at 0x...>
         >>> s.popitem()
         ('a', 1)
-        >>> s.pop()
+        >>> s.reset()
         {}
         >>> dict(s)
         {'a': 1}
@@ -644,28 +598,6 @@ class StackedDict(object):
                 if key not in self._overriden[0]:
                     self._overriden[0][key] = value
         return key, value
-
-    def push(self):
-        """Save current dictionary state, record next changes in some diff
-        history.
-
-        Returns StackedDict instance, so that you can chain operations.
-
-        Use :py:meth:`pop` to restore the saved state.
-
-        >>> s = StackedDict(a=1)
-        >>> s.push().update(a='A')
-        >>> dict(s)
-        {'a': 'A'}
-        >>> s.pop()
-        {'a': 'A'}
-        >>> dict(s)
-        {'a': 1}
-
-        """
-        self._created.appendleft(set())
-        self._overriden.appendleft({})
-        return self
 
     def setdefault(self, key, default=None):
         """If key is in the dictionary, return its value. If not, insert key
@@ -711,7 +643,7 @@ class StackedDict(object):
         >>> s.update(a=1)
         >>> view
         dict_items([('a', 1)])
-        >>> s.push().update(a='A')
+        >>> s.commit().update(a='A')
         >>> view
         dict_items([('a', 'A')])
 
@@ -731,7 +663,7 @@ class StackedDict(object):
         >>> s.update(a=1)
         >>> view
         dict_keys(['a'])
-        >>> s.push()  # doctest: +ELLIPSIS
+        >>> s.commit()  # doctest: +ELLIPSIS
         <wardrobe.stackeddict.StackedDict object at 0x...>
         >>> del s['a']
         >>> s['b'] = 2
@@ -754,7 +686,7 @@ class StackedDict(object):
         >>> s.update(a=1)
         >>> view
         dict_values([1])
-        >>> s.push()  # doctest: +ELLIPSIS
+        >>> s.commit()  # doctest: +ELLIPSIS
         <wardrobe.stackeddict.StackedDict object at 0x...>
         >>> del s['a']
         >>> s['b'] = 2
@@ -763,3 +695,74 @@ class StackedDict(object):
 
         """
         return self._dict.viewvalues()
+
+    def commit(self):
+        """Save current dictionary state, record next changes in some diff
+        history.
+
+        Returns StackedDict instance, so that you can chain operations.
+
+        Use :py:meth:`reset` to restore the saved state.
+
+        >>> s = StackedDict(a=1)
+        >>> s.commit().update(a='A')
+        >>> dict(s)
+        {'a': 'A'}
+        >>> s.reset()
+        {'a': 'A'}
+        >>> dict(s)
+        {'a': 1}
+
+        """
+        self._created.appendleft(set())
+        self._overriden.appendleft({})
+        return self
+
+    def reset(self):
+        """Restore dictionary to state before last :py:meth:`commit`.
+        
+        >>> s = StackedDict(a=1, b=2)
+        >>> s.commit().update(c=3, d=4)
+        >>> s.reset()
+        {'c': 3, 'd': 4}
+        >>> dict(s)
+        {'a': 1, 'b': 2}
+        >>> s.commit().update(a='A', b='B')
+        >>> s.reset()
+        {'a': 'A', 'b': 'B'}
+        >>> dict(s)
+        {'a': 1, 'b': 2}
+        >>> s.commit().update(a='A', c=3)
+        >>> s.reset()
+        {'a': 'A', 'c': 3}
+        >>> dict(s)
+        {'a': 1, 'b': 2}
+
+        Raises NoRevisionException when invoked on a StackedDict instance that hasn't
+        been pushed yet.
+
+        >>> s = StackedDict()
+        >>> s.reset()
+        Traceback (most recent call last):
+        ...
+        NoRevisionException
+        
+        """
+        layer = {}  # We will return current changes.
+        # Pop.
+        try:
+            created = self._created.popleft()
+            overriden = self._overriden.popleft()
+        except IndexError:
+            raise NoRevisionException()
+        # Delete created keys.
+        for key in created: 
+            layer[key] = self._dict.pop(key)
+        # Restore overridden (key, value) pairs. 
+        for key, value in overriden.items():
+            try:
+                layer[key] = self._dict[key]
+            except KeyError:  # Case of deleted item.
+                pass
+            self._dict[key] = value
+        return layer
