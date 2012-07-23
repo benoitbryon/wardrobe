@@ -556,10 +556,49 @@ class StackedDict(object):
         for key in kwargs:
             self[key] = kwargs[key]
 
-    def reset(self):
-        """"""
+    def pop(self, key, *args):
+        """If key is in the dictionary, remove it and return its value, else
+        return default.
 
-    
+        >>> s = StackedDict(a=1, b=2, c=3)
+        >>> s.pop('a')
+        1
+        >>> 'a' in s
+        False
+        >>> s.pop('a', 'A')
+        'A'
+
+        If default is not given and key is not in the dictionary, a KeyError is
+        raised.
+
+        >>> s = StackedDict()
+        >>> s.pop('a')
+        Traceback (most recent call last):
+        ...
+        KeyError: 'a'
+
+        Affects only current layer.
+
+        >>> s = StackedDict(a=1, b=2, c=3)
+        >>> s.commit()  # doctest: +ELLIPSIS
+        <wardrobe.stackeddict.StackedDict object at 0x...>
+        >>> s.pop('b')
+        2
+        >>> s.reset()
+        {}
+        >>> s['b']
+        2
+
+        """
+        value = self._dict.pop(key, *args)
+        if self._has_layers():
+            try:
+                self._created[0].remove(key)
+            except KeyError:
+                if key not in self._overriden[0]:
+                    self._overriden[0][key] = value
+        return value
+
     def popitem(self):
         """Remove and return some (key, value) pair as a 2-tuple.
 
