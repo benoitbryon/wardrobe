@@ -2,12 +2,8 @@
 Vision
 ######
 
-wardrobe is about stack-based datastructures for Python.
+wardrobe is about contextual tools for Python. Currently, it provides only one
+datastructure: :py:class:`StackedDict`.
 
-It's goal is to provide simple and general-usage stack-based datastructures, as
-a lightweight library.
-
-The project was created with StackedDict, in order to implement context
-objects.
-
-The project may provide more datastructures in future versions.
+The project may provide more utilities or datastructures in future versions.
+But StackedDict may also become a standalone library.

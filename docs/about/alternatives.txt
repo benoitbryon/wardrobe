@@ -10,25 +10,39 @@ functionalities. It focuses on differences with wardrobe.
 Django's template contexts
 **************************
 
-Django's template contexts (django.template.context.Context) are also
-dictionary-like objects that support push() and pop() methods.
+`Django`_'s template contexts (django.template.context.Context) are
+dictionary-like objects that support push() and pop() methods. They are used to
+backup and restore the context in some template tags.
 
-* wardrobe is lighter than Django.
+Some notes:
 
 * wardrobe focuses on stack-based datastructures, whereas Django is a web
   framework.
+
+* wardrobe is lighter than Django.
 
 * wardrobe.StackedDict targets general Python usage, whereas Django's Context
   objects are specialized for use in the Django's template language.
 
 * As of Django 1.4, wardrobe.StackedDict instances looks more like standard
-  dict objects than Django's Context instances.
+  dict objects than Django's Context instances. As examples, look at
+  __delitem__() or pop() methods.
 
 * Django could use wardrobe.StackedDict... but, as of Django 1.4, it doesn't
   match the "almost no external dependencies" policy in Django project.
 
-**********
-Contextvar
-**********
+
+***********
+Contextvars
+***********
+
+`Contextvars`_ is about contextual variables. Not about contextual
+dictionary-like objects.
 
 
+**********
+References
+**********
+
+.. _`Django`: http://djangoproject.com
+.. _`Contextvars`: http://pypi.python.org/pypi/contextvars

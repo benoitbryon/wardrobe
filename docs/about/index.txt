@@ -5,11 +5,13 @@ About wardrobe
 This section is about the project itself.
 
 .. toctree::
+   :maxdepth: 1
 
    vision
-   other-projects
-   license
-   HISTORY
+   alternatives
+   LICENSE
+   AUTHORS
+   CHANGELOG
 
 
 ********************

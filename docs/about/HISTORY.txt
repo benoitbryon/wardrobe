@@ -1,9 +1,0 @@
-######################
-Changelog for wardrobe
-######################
-
-
-0.1 (unreleased)
-================
-
-- Initial implementation of StackedDict.

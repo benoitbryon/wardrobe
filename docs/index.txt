@@ -3,9 +3,9 @@ wardrobe's documentation
 ########################
 
 wardrobe is a Python project that provides a stack-based datastructure:
-:py:class`StackedDict`.
+:py:class:`StackedDict`.
 
-:py:class`StackedDict` is a dictionary-like object with additional methods to
+:py:class:`StackedDict` is a dictionary-like object with additional methods to
 save the current state (commit) and restore it (reset).
 
 .. doctest::
@@ -46,8 +46,10 @@ Contents
 .. toctree::
    :maxdepth: 2
 
+   INSTALL
    api/index
    about/index
+   dev
 
 
 ******************

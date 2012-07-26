@@ -2,8 +2,8 @@
 wardrobe
 ########
 
-wardrobe is a Python project that provides a stack-based datastructure:
-StackedDict.
+wardrobe is a Python project about datastructures to manage contexts. It
+currently provides one class: StackedDict.
 
 StackedDict is a dictionary-like object with additional methods to
 save the current state (commit) and restore it (reset).
@@ -40,25 +40,13 @@ Example:
   ...                 'sex_appeal': True}
   True
 
-wardrobe.StackedDict is useful to create context objects, like `Django's
-django.template.context:Context objects`_.
+wardrobe.StackedDict is useful to create context objects, like Django's
+django.template.context:Context objects.
 
 
 **********
 Ressources
 **********
 
-* `code repository`_
-* `bugtracker`_
-
-
-**********
-References
-**********
-
-.. target-notes::
-
-.. _`Django's django.template.context:Context objects`: 
-   https://github.com/django/django/blob/master/django/template/context.py
-.. _`code repository`: https://github.com/benoitbryon/wardrobe
-.. _`bugtracker`: https://github.com/benoitbryon/wardrobe/issues
+* code repository: https://github.com/benoitbryon/wardrobe
+* bugtracker: https://github.com/benoitbryon/wardrobe/issues

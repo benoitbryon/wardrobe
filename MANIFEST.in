@@ -2,3 +2,4 @@ recursive-include wardrobe *
 global-exclude *.pyc
 include *.txt
 include *.rst
+include AUTHORS CHANGELOG INSTALL LICENSE README VERSION

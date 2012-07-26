@@ -11,6 +11,7 @@ from unittest import TestCase
 package_dir = dirname(dirname(abspath(__file__)))
 package_name = basename(package_dir)
 project_dir = dirname(package_dir)
+build_dir = join(project_dir, 'var', 'docs', 'html')
 
 
 class DocumentationBuildTestCase(TestCase):
@@ -22,8 +23,7 @@ class DocumentationBuildTestCase(TestCase):
 
     def test_documentation_build(self):
         """Build documentation."""
-        build_dir = join('docs', '_build', 'html')
-        build_file = join('docs', '_build', 'html', 'index.html')
+        build_file = join(build_dir, 'index.html')
         # First, if files to be generated already exist, remember their
         # modification time.
         build_time = None
@@ -46,8 +46,7 @@ class DocumentationBuildTestCase(TestCase):
 
     def test_readme_build(self):
         """Build README."""
-        build_dir = join('docs', '_build', 'html')
-        build_file = join('docs', '_build', 'html', 'README.html')
+        build_file = join(build_dir, 'README.html')
         # First, if files to be generated already exist, remember their
         # modification time.
         build_time = None

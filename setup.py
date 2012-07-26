@@ -12,7 +12,7 @@ def read_relative_file(filename):
 
 
 NAME = 'wardrobe'
-README = read_relative_file('README.rst')
+README = read_relative_file('README')
 VERSION = read_relative_file(os.path.join(NAME, 'version.txt')).strip()
 
 

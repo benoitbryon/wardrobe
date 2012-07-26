@@ -258,7 +258,16 @@ class StackedDict(MutableMapping):
         return self.has_key(key)
 
     def __cmp__(self, other):
-        """Comparison operator."""
+        """Comparison operator.
+        
+        >>> d1 = dict(a=1, b=2, c=3)
+        >>> d2 = dict(b=1, c=1)
+        >>> s1 = StackedDict(d1)
+        >>> s2 = StackedDict(d2)
+        >>> cmp(d1, d2) == cmp(s1, s2)
+        True
+        
+        """
         return cmp(dict(self), dict(other))
 
     def __enter__(self):

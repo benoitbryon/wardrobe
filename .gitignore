@@ -9,8 +9,8 @@
 # Libraries.
 /lib/
 
-# Documentation builds.
-/docs/_build/
+# Data files.
+/var/
 
 # Coverage output.
 /.coverage
