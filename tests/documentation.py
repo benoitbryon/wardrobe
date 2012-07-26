@@ -8,9 +8,8 @@ import time
 from unittest import TestCase
 
 
-package_dir = dirname(dirname(abspath(__file__)))
-package_name = basename(package_dir)
-project_dir = dirname(package_dir)
+tests_dir = dirname(abspath(__file__))
+project_dir = dirname(tests_dir)
 build_dir = join(project_dir, 'var', 'docs', 'html')
 
 

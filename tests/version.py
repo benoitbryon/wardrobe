@@ -3,8 +3,8 @@ from os.path import abspath, basename, dirname, join
 from unittest import TestCase
 
 
-package_dir = dirname(dirname(abspath(__file__)))
-package_name = basename(package_dir)
+tests_dir = dirname(abspath(__file__))
+package_name = 'wardrobe'
 
 
 class PEP396TestCase(TestCase):
