@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-0.1 (unreleased)
+0.1 (2012-07-26)
 ----------------
 
 - Initial implementation of StackedDict: mimics standard dict class.
