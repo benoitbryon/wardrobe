@@ -52,6 +52,16 @@ Contents
    dev
 
 
+**********
+Ressources
+**********
+
+* `online documentation <http://wardrobe.readthedocs.org>`_
+* `PyPI page <http://pypi.python.org/pypi/wardrobe>`_
+* `code repository <https://github.com/benoitbryon/wardrobe>`_
+* `bugtracker <https://github.com/benoitbryon/wardrobe/issues>`_
+
+
 ******************
 Indices and tables
 ******************

@@ -48,5 +48,7 @@ django.template.context:Context objects.
 Ressources
 **********
 
+* online documentation: http://wardrobe.readthedocs.org
+* PyPI page: http://pypi.python.org/pypi/wardrobe
 * code repository: https://github.com/benoitbryon/wardrobe
 * bugtracker: https://github.com/benoitbryon/wardrobe/issues

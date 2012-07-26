@@ -5,4 +5,4 @@ Changelog
 0.1 (unreleased)
 ----------------
 
-- Initial implementation of StackedDict.
+- Initial implementation of StackedDict: mimics standard dict class.
