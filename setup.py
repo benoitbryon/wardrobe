@@ -1,19 +1,19 @@
 # coding=utf-8
 """Python packaging."""
-import os
+from os.path import dirname, join
 from setuptools import setup
 
 
 def read_relative_file(filename):
     """Returns contents of the given file, which path is supposed relative
     to this module."""
-    with open(os.path.join(os.path.dirname(__file__), filename)) as f:
+    with open(join(dirname(__file__), filename)) as f:
         return f.read()
 
 
 NAME = 'wardrobe'
 README = read_relative_file('README')
-VERSION = read_relative_file(os.path.join(NAME, 'version.txt')).strip()
+VERSION = read_relative_file('VERSION').strip()
 
 
 setup(name=NAME,

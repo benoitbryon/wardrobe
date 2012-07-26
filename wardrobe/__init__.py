@@ -20,5 +20,6 @@ from wardrobe.stackeddict import StackedDict
 
 #: Implement :pep:`396`
 package_dir = dirname(abspath(__file__))
-version_file = join(package_dir, 'version.txt')
+project_dir = dirname(package_dir)
+version_file = join(project_dir, 'VERSION')
 __version__ = open(version_file).read().strip()
