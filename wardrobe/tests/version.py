@@ -5,7 +5,6 @@ from unittest import TestCase
 
 package_dir = dirname(dirname(abspath(__file__)))
 package_name = basename(package_dir)
-project_dir = dirname(package_dir)
 
 
 class PEP396TestCase(TestCase):
@@ -38,7 +37,7 @@ class PEP396TestCase(TestCase):
                       'setuptools, which is a dependency of %s.' % package_name)
         package_version = self.get_package_version()
         self.assertEqual(installed_version, package_version,
-                         'Version mismatch: VERSION file tells "%s" whereas ' \
+                         'Version mismatch: version.txt tells "%s" whereas ' \
                          'pkg_resources tells "%s". ' \
                          'YOU MAY NEED TO RUN ``make update`` to update the ' \
                          'installed version in development environment.' \
